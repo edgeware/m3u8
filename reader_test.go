@@ -1061,6 +1061,31 @@ func TestDecodeMasterChannels(t *testing.T) {
 	}
 }
 
+func TestDecodeMediaPlaylistWithXMap(t *testing.T) {
+	f, err := os.Open("sample-playlists/media-playlist-with-xmap.m3u8")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _, err := DecodeFrom(bufio.NewReader(f), true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pp := p.(*MediaPlaylist)
+	CheckType(t, pp)
+
+	// Check for EXT-X-MAP
+	foundEXTXMAP := false
+	for _, seg := range pp.Segments {
+		if seg != nil && seg.Map != nil {
+			foundEXTXMAP = true
+			break
+		}
+	}
+	if !foundEXTXMAP {
+		t.Error("EXT-X-MAP not found in media playlist.")
+	}
+}
+
 /****************
  *  Benchmarks  *
  ****************/
